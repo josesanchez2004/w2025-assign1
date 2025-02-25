@@ -165,7 +165,7 @@ app.get("/api/paintings" , async(req,res) => {
     .order("title" , {ascending: true});
 
     if (error) {
-        console.error("Supabase Query Error:", error);
+        console.log("Supabase Query Error:", error);
         return res.status(500).json({ error: error.message });
     }
 
@@ -306,5 +306,104 @@ app.get("/api/paintings/artists/country/:substring", async(req,res) => {
         res.send(data)
     }else{
         res.send({Error:"There is no entry within the database with the substring inputted. Please try again" } );
+    }
+})
+
+
+/**
+ * Returns all the genres
+ */
+app.get("/api/genres", async(req,res) => {
+
+    const {data, error} = await supabase 
+    .from("Genres")
+    .select("genreId, genreName, eraId, description, wikiLink , Eras(eraId, eraName, eraYears)");
+
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+})
+
+/**
+ * Returns the specified genre by id 
+ */
+app.get("/api/genres/:id" , async(req,res) => {
+
+    const id = req.params.id;
+
+    const {data, error} = await supabase
+    .from("Genres")
+    .select("genreId, genreName, eraId, description, wikiLink , Eras(eraId, eraName, eraYears)")
+    .eq("genreId", id);
+
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+})
+
+/**
+ * Returns the genres used in a given painting 
+ */
+app.get("/api/genres/painting/:id", async(req, res) => {
+
+    const id = parseInt(req.params.id);
+
+    const {data,error} = await supabase
+    .from("PaintingGenres")
+    .select("Genres!inner(genreId, genreName, eraId, description, wikiLink, Eras!inner(eraId, eraName, eraYears) )")
+    .eq("paintingId", id)
+    .order("genreName" , {foreignTable:"Genres",ascending: true});
+
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+})
+
+/**
+ * Returns all the paintings for a given genre by id
+ */
+app.get("/api/paintings/genre/:id" , async(req,res) => {
+    const id = req.params.id;
+
+    const {data,error} = await supabase 
+    .from("Paintings")
+    .select("paintingId, title, yearOfWork , PaintingGenres!inner(genreId)")
+    .eq("PaintingGenres.genreId",id)
+    .order("yearOfWork", {ascending: true});
+
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+})
+
+/**
+ * Returns all the paintings for a given era by id 
+ */
+app.get("/api/paintings/era/:id" , async(req,res) => {
+    const id = req.params.id;
+
+    const {data,error} = await supabase
+    .from("Paintings")
+    .select("paintingId, title, yearOfWork, PaintingGenres!inner(Genres!inner(Eras!inner(eraId, eraName, eraYears)))")
+    .eq("PaintingGenres.Genres.Eras.eraId", id)
+    .order("yearOfWork", { ascending: true });
+
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
