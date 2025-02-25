@@ -54,7 +54,12 @@ app.get(`/api/galleries/:id` , async (req,res) => {
     .select("*")
     .eq("galleryId", galleryId);
 
-    res.send(data);
+    if(data.length > 0){
+        res.send(data);
+    }
+    else{
+        res.send({Error: "There is no entry within the database with the id inputted. Please try again"});
+    }
 })
 
 /**
@@ -64,12 +69,242 @@ app.get('/api/galleries/country/:substring' , async (req,res) => {
 
     const substring = req.params.substring;
 
-    console.log(substring);
-
     const {data,error} = await supabase
     .from("Galleries")
     .select("*")
     .ilike("galleryCountry", `${substring}%`)
 
+    if(data.length > 0){
+        res.send(data);
+    }
+    else{
+        res.send({Error: "There is no entry within the database with the substring inputted. Please try again"});
+    }
+})
+
+/**
+ * Returns all artists 
+ */
+app.get('/api/artists', async (req,res) => {
+
+    const {data,error} = await supabase
+    .from("Artists")
+    .select("*")
+
     res.send(data);
+})
+
+/**
+ * Returns the specified artist by id
+ */
+app.get('/api/artists/:id' , async (req,res) => {
+
+    const id = req.params.id;
+
+    const {data,error} = await supabase
+    .from("Artists")
+    .select("*")
+    .eq("artistId", id);
+
+    if(data.length > 0){
+        res.send(data);
+    }
+    else{
+        res.send({Error: "There is no entry within the database with the id inputted. Please try again"});
+    }
+})
+
+/**
+ * Returns the artist whose last name begins with the provided substring
+ */
+app.get("/api/artists/search/:substring" , async(req,res) => {
+
+    const substring = req.params.substring;
+
+    const {data,error} = await supabase
+    .from("Artists")
+    .select("*")
+    .ilike("lastName", `${substring}%`);
+
+    if(data.length > 0){
+        res.send(data);
+    }
+    else{
+        res.send({Error: "There is no entry within the database with the substring inputted. Please try again"});
+    }
+})
+
+/**
+ * Returns the artists whose nationality begins with the provided substring
+ */
+app.get("/api/artists/country/:substring" , async(req,res) => {
+    
+    const substring = req.params.substring;
+
+    const {data,error} = await supabase
+    .from("Artists")
+    .select("*")
+    .ilike("nationality", `${substring}%`);
+
+    if(data.length > 0){
+        res.send(data);
+    }
+    else{
+        res.send({Error: "There is no entry within the database with the substring inputted. Please try again"});
+    }
+})
+
+/**
+ * Returns all paintings
+ */
+app.get("/api/paintings" , async(req,res) => {
+    
+    const {data,error} = await supabase 
+    .from("Paintings")
+    .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
+    .order("title" , {ascending: true});
+
+    if (error) {
+        console.error("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.send(data);
+})
+
+/**
+ * Returns all paintings sorted by title or yearOfWork
+ */
+app.get("/api/paintings/sort/:choice" , async(req,res) => {
+
+    const choice = req.params.choice == 'title' ? "title" : "yearOfWork";
+
+    const {data,error} = await supabase 
+    .from("Paintings")
+    .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
+    .order( `${choice}` , {ascending: true});
+
+    res.send(data);
+})
+
+/**
+ * Returns the specified painting by id
+ */
+
+app.get("/api/paintings/:id", async(req,res) => {
+
+    const id = parseInt(req.params.id);
+
+    const {data, error} = await supabase
+    .from("Paintings")
+    .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
+    .eq("paintingId", id)
+    .order("title" , {ascending: true});
+
+    if(data.length > 0){
+        res.send(data);
+    }else{
+        res.send({Error:"There is no entry within the database with the id inputted. Please try again" } );
+    }
+    
+})
+
+/**
+ * Returns the paintings whose title contains the provided substring
+ */
+app.get("/api/paintings/search/:substring" , async(req,res) => {
+
+    const substring = req.params.substring;
+
+    const {data,error}  = await supabase 
+    .from("Paintings")
+    .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
+    .ilike("title" ,  `${substring}%`)
+    .order("title" , {ascending: true});
+
+    if(data.length > 0 ){
+        res.send(data)
+    }else{
+        res.send({Error:"There is no entry within the database with the substring inputted. Please try again" } );
+    }
+
+})
+
+/**
+ * Returns the paintings between two dates ordered by year in ascending order 
+ */
+app.get("/api/paintings/years/:start/:end" , async(req,res) => {
+
+    const start = req.params.start;
+    const end = req.params.end;
+
+    const {data, error}  = await supabase 
+    .from("Paintings")
+    .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
+    .gt("yearOfWork", start)
+    .lt("yearOfWork", end)
+    .order("title", {ascending: true} );
+
+    if(data.length > 0 ){
+        res.send(data)
+    }else{
+        res.send({Error:"There is no entry within the database with the substring inputted. Please try again" } );
+    }
+})
+
+/**
+ * Returns all paintings in a given gallery
+ */
+app.get("/api/paintings/galleries/:id", async(req,res) => {
+    
+    const id = req.params.id;
+
+    const {data, error} = await supabase
+    .from("Paintings")
+    .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
+    .eq("galleryId" , id)
+    .order("title", {ascending: true});
+
+    if(data.length > 0 ){
+        res.send(data)
+    }else{
+        res.send({Error:"There is no entry within the database with the id inputted. Please try again" } );
+    }
+})
+
+/**
+ * Returns all paintings by artists whose nationality begins with the provided substring
+ */
+app.get("/api/paintings/artist/:id" , async(req,res) => {
+
+    const id = req.params.id;
+
+    const {data,error} = await supabase
+    .from("Paintings")
+    .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
+    .eq("artistId", id)
+
+    if(data.length > 0 ){
+        res.send(data)
+    }else{
+        res.send({Error:"There is no entry within the database with the substring inputted. Please try again" } );
+    }
+})
+
+/**
+ * Returns all the paintings by artists whose nationality begins with the provided substring 
+ */
+app.get("/api/paintings/artists/country/:substring", async(req,res) => {
+    const substring = req.params.substring;
+
+    const {data,error} = await supabase
+    .from("Paintings")
+    .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists!inner(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
+    .ilike("Artists.nationality", `${substring}%`);
+
+    if(data.length > 0 ){
+        res.send(data)
+    }else{
+        res.send({Error:"There is no entry within the database with the substring inputted. Please try again" } );
+    }
 })
