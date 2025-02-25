@@ -28,7 +28,13 @@ app.get('/api/eras', async (req, res) => {
     const {data, error} = await supabase
     .from('Eras')
     .select("*");
-    res.send(data);
+    
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
 });
 
 /**
@@ -39,7 +45,12 @@ app.get('/api/galleries' , async (req,res) => {
     .from("Galleries")
     .select("*");
 
-    res.send(data);
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
 })
 
 /**
@@ -54,11 +65,11 @@ app.get(`/api/galleries/:id` , async (req,res) => {
     .select("*")
     .eq("galleryId", galleryId);
 
-    if(data.length > 0){
+    if(!error){
         res.send(data);
-    }
-    else{
-        res.send({Error: "There is no entry within the database with the id inputted. Please try again"});
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
 
@@ -74,11 +85,11 @@ app.get('/api/galleries/country/:substring' , async (req,res) => {
     .select("*")
     .ilike("galleryCountry", `${substring}%`)
 
-    if(data.length > 0){
+    if(!error){
         res.send(data);
-    }
-    else{
-        res.send({Error: "There is no entry within the database with the substring inputted. Please try again"});
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
 
@@ -91,7 +102,12 @@ app.get('/api/artists', async (req,res) => {
     .from("Artists")
     .select("*")
 
-    res.send(data);
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
 })
 
 /**
@@ -106,11 +122,11 @@ app.get('/api/artists/:id' , async (req,res) => {
     .select("*")
     .eq("artistId", id);
 
-    if(data.length > 0){
+    if(!error){
         res.send(data);
-    }
-    else{
-        res.send({Error: "There is no entry within the database with the id inputted. Please try again"});
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
 
@@ -126,11 +142,11 @@ app.get("/api/artists/search/:substring" , async(req,res) => {
     .select("*")
     .ilike("lastName", `${substring}%`);
 
-    if(data.length > 0){
+    if(!error){
         res.send(data);
-    }
-    else{
-        res.send({Error: "There is no entry within the database with the substring inputted. Please try again"});
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
 
@@ -146,11 +162,11 @@ app.get("/api/artists/country/:substring" , async(req,res) => {
     .select("*")
     .ilike("nationality", `${substring}%`);
 
-    if(data.length > 0){
+    if(!error){
         res.send(data);
-    }
-    else{
-        res.send({Error: "There is no entry within the database with the substring inputted. Please try again"});
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
 
@@ -164,12 +180,12 @@ app.get("/api/paintings" , async(req,res) => {
     .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
     .order("title" , {ascending: true});
 
-    if (error) {
+    if(!error){
+        res.send(data);
+    }else{
         console.log("Supabase Query Error:", error);
         return res.status(500).json({ error: error.message });
     }
-
-    res.send(data);
 })
 
 /**
@@ -184,7 +200,12 @@ app.get("/api/paintings/sort/:choice" , async(req,res) => {
     .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
     .order( `${choice}` , {ascending: true});
 
-    res.send(data);
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
 })
 
 /**
@@ -201,10 +222,11 @@ app.get("/api/paintings/:id", async(req,res) => {
     .eq("paintingId", id)
     .order("title" , {ascending: true});
 
-    if(data.length > 0){
+    if(!error){
         res.send(data);
     }else{
-        res.send({Error:"There is no entry within the database with the id inputted. Please try again" } );
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
     
 })
@@ -222,10 +244,11 @@ app.get("/api/paintings/search/:substring" , async(req,res) => {
     .ilike("title" ,  `${substring}%`)
     .order("title" , {ascending: true});
 
-    if(data.length > 0 ){
-        res.send(data)
+    if(!error){
+        res.send(data);
     }else{
-        res.send({Error:"There is no entry within the database with the substring inputted. Please try again" } );
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 
 })
@@ -245,10 +268,11 @@ app.get("/api/paintings/years/:start/:end" , async(req,res) => {
     .lt("yearOfWork", end)
     .order("title", {ascending: true} );
 
-    if(data.length > 0 ){
-        res.send(data)
+    if(!error){
+        res.send(data);
     }else{
-        res.send({Error:"There is no entry within the database with the substring inputted. Please try again" } );
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
 
@@ -265,10 +289,11 @@ app.get("/api/paintings/galleries/:id", async(req,res) => {
     .eq("galleryId" , id)
     .order("title", {ascending: true});
 
-    if(data.length > 0 ){
-        res.send(data)
+    if(!error){
+        res.send(data);
     }else{
-        res.send({Error:"There is no entry within the database with the id inputted. Please try again" } );
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
 
@@ -284,10 +309,11 @@ app.get("/api/paintings/artist/:id" , async(req,res) => {
     .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
     .eq("artistId", id)
 
-    if(data.length > 0 ){
-        res.send(data)
+    if(!error){
+        res.send(data);
     }else{
-        res.send({Error:"There is no entry within the database with the substring inputted. Please try again" } );
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
 
@@ -302,10 +328,11 @@ app.get("/api/paintings/artists/country/:substring", async(req,res) => {
     .select("paintingId, imageFileName, title, shapeId, museumLink, accessionNumber, copyrightText, description, excerpt, yearOfWork, width, height, medium, cost, MSRP, googleLink, googleDescription, wikiLink, jsonAnnotations, Artists!inner(artistId, firstName, lastName, nationality, gender, yearOfBirth, yearOfDeath, details , artistLink), Galleries(galleryId, galleryName, galleryNativeName, galleryCity, galleryAddress, galleryCountry, latitude, longitude, galleryWebSite, flickrPlaceId, yahooWoeId, googlePlaceId)")
     .ilike("Artists.nationality", `${substring}%`);
 
-    if(data.length > 0 ){
-        res.send(data)
+    if(!error){
+        res.send(data);
     }else{
-        res.send({Error:"There is no entry within the database with the substring inputted. Please try again" } );
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
     }
 })
 
@@ -407,3 +434,45 @@ app.get("/api/paintings/era/:id" , async(req,res) => {
         return res.status(500).json({ error: error.message });
     }
 })
+
+/**
+ * Returns the genre name and the number of paintings for each genre, sorted by the number of paintings
+ */
+app.get("/api/counts/genres" , async(req,res) => {
+    
+    const { data, error } = await supabase
+
+    //created view using the sql editor within supabase and are querying the data within it 
+    .from("genre_painting_counts")
+    .select("*")
+
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+})
+
+/**
+ * Returns the artist name and the number of paintings for each artist, sorted by the number of paintings
+ */
+app.get("/api/counts/artists" , async(req,res) => {
+    const { data, error } = await supabase
+
+    //created view using the sql editor within supabase and are querying the data within it 
+    .from("artist_count")
+    .select("*")
+
+    if(!error){
+        res.send(data);
+    }else{
+        console.log("Supabase Query Error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+})
+
+app.get("/api/counts/topgenres/:id", async (req, res) => {
+    res.send({Error: "This endpoint has not been implemented yet."});
+});
